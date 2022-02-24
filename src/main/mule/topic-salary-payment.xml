@@ -44,7 +44,7 @@ payload]]]></jms:body>
 		<logger level="INFO" doc:name="Logger" doc:id="3acfe12e-4230-48b9-8653-882f09ca6b3a" />
 	</flow>
 	<flow name="topic-salary-paymentFlow1" doc:id="1bfc992f-6a7d-427a-b156-241691baaff5" >
-		<jms:listener doc:name="On New Message" doc:id="ce03170d-c1bc-4bf4-b9fa-9f0f07b658a7" config-ref="JMS_Config" destination="Project4Topic">
+		<jms:listener doc:name="On New Message" doc:id="ce03170d-c1bc-4bf4-b9fa-9f0f07b658a7" config-ref="JMS_Config" destination="Project4Topic" numberOfConsumers="1">
 			<jms:consumer-type >
 				<jms:topic-consumer />
 			</jms:consumer-type>
