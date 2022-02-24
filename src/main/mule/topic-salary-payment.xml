@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="topic-salary-paymentFlow" doc:id="2bd43b46-3cde-4630-8b88-5c03b1fd14bd" >
+		<http:listener doc:name="Listener" doc:id="0e08e996-dbfe-48a3-95b8-2b91e26bd4f8" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/payrun"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="f939c9ba-9c37-44cb-869e-3ea869a87b80" />
+		<jms:publish doc:name="Publish" doc:id="3a36cd86-630a-4c94-96c7-e5ff709894ed" config-ref="JMS_Config" destination="Project4" destinationType="TOPIC">
+			<jms:message >
+				<jms:body ><![CDATA[#[output application/json
+---
+payload]]]></jms:body>
+				<jms:properties ><![CDATA[#[{publisher: "finance department"}]]]></jms:properties>
+			</jms:message>
+		</jms:publish>
+		<logger level="INFO" doc:name="Logger" doc:id="af481408-20d7-40be-9a07-0bcc628195bc" />
+	</flow>
+	<flow name="topic-salary-payment-non-durableFlow1" doc:id="9ad201ed-6ee3-4373-ab00-fbf18b588627" >
+		<jms:listener doc:name="On New Message" doc:id="e3bb4d96-5f29-48fc-ae9d-c9490abdc6ac" config-ref="JMS_Config" destination="Project4">
+			<jms:consumer-type >
+				<jms:topic-consumer/>
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="0b251626-cba5-426a-86ba-d8e2e313c94b" />
+		<db:insert doc:name="Insert" doc:id="57c8b87c-b1c3-4f41-b465-d20ceea37556" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO payments(student_id, amount, bank_account, sort_code) VALUES (:student_id, :amount, :bank_account, :sort_code)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.amount, bank_account: payload.'bank_account', sort_code: payload.'sort_code'}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="58eef7fa-f6a1-466d-aee5-ca8f4c92fc15" />
+	</flow>
+</mule>
