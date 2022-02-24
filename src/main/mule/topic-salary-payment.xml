@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<flow name="topic-salary-paymentFlow" doc:id="2bd43b46-3cde-4630-8b88-5c03b1fd14bd" >
 		<http:listener doc:name="Listener" doc:id="0e08e996-dbfe-48a3-95b8-2b91e26bd4f8" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/payrun"/>
 		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="f939c9ba-9c37-44cb-869e-3ea869a87b80" />
-		<jms:publish doc:name="Publish" doc:id="3a36cd86-630a-4c94-96c7-e5ff709894ed" config-ref="JMS_Config" destination="Project4" destinationType="TOPIC">
+		<jms:publish doc:name="Publish" doc:id="3a36cd86-630a-4c94-96c7-e5ff709894ed" config-ref="JMS_Config" destination="Project4">
 			<jms:message >
 				<jms:body ><![CDATA[#[output application/json
 ---
@@ -22,7 +22,7 @@ payload]]]></jms:body>
 	<flow name="topic-salary-payment-non-durableFlow1" doc:id="9ad201ed-6ee3-4373-ab00-fbf18b588627" >
 		<jms:listener doc:name="On New Message" doc:id="e3bb4d96-5f29-48fc-ae9d-c9490abdc6ac" config-ref="JMS_Config" destination="Project4">
 			<jms:consumer-type >
-				<jms:topic-consumer/>
+				<jms:queue-consumer />
 			</jms:consumer-type>
 		</jms:listener>
 		<logger level="INFO" doc:name="Logger" doc:id="0b251626-cba5-426a-86ba-d8e2e313c94b" />
