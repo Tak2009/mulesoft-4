@@ -24,4 +24,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<db:config name="Database_Config_Hr" doc:name="Database Config" doc:id="5f6c5915-7bfd-4190-844e-10500a11f81d" >
 		<db:generic-connection url="${trainee.host}" driverClassName="${trainee.driver}" user="${trainee.user}" password="${trainee.pw}" />
 	</db:config>
+	<db:config name="Database_Config_Accounting" doc:name="Database Config" doc:id="5d77bbad-1d4f-4719-b67c-59b96e6916f2" >
+		<db:generic-connection url="${accounting.url}" driverClassName="${accounting.driver}" user="${accounting.user}" password="${accounting.pw}" />
+	</db:config>
 </mule>

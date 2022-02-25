@@ -50,12 +50,12 @@ payload]]]></jms:body>
 			</jms:consumer-type>
 		</jms:listener>
 		<db:insert doc:name="Insert Into Finance DB" doc:id="3c6534df-b43e-4029-884b-ccf0a6a388ef" config-ref="Database_Config_Finance" >
-			<db:sql ><![CDATA[INSERT INTO payments(student_id, amount, bank_account, sort_code) VALUES (:student_id, :amount, :bank_account, :sort_code)]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.'payment_amount', bank_account: payload.'bank_account', sort_code: payload.'sort_code'}]]]></db:input-parameters>
+			<db:sql ><![CDATA[INSERT INTO payments(student_id, amount, bank_account, sort_code, payment_date) VALUES (:student_id, :amount, :bank_account, :sort_code, :payment_date)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.'payment_amount', bank_account: payload.'bank_account', sort_code: payload.'sort_code', "payment_date": payload.'payment_date'}]]]></db:input-parameters>
 		</db:insert>
 		<logger level="INFO" doc:name="Logger" doc:id="cdcf43c4-cecd-41cb-b4bf-1e59943de701" />
 	</flow>
-	<flow name="topic-hr-salariesFlow" doc:id="9783a297-1c0d-4b1c-9bf5-32daaa4c4647" >
+	<flow name="topic-hr-salariesFlow" doc:id="9783a297-1c0d-4b1c-9bf5-32daaa4c4647" initialState="stopped">
 		<jms:listener doc:name="Listen to Topic" doc:id="e2395b2c-776b-4c90-94ba-e9b4c0c335cd" config-ref="JMS_Config" destination="Project4Topic" numberOfConsumers="1" >
 			<jms:consumer-type >
 				<jms:topic-consumer />
@@ -73,5 +73,10 @@ payload]]]></jms:body>
 				<fixed-frequency frequency="10" timeUnit="SECONDS" />
 			</scheduling-strategy>
 		</db:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="a424d363-7902-48e8-9041-58750da71cba" />
+		<db:insert doc:name="Insert into Accounting DB" doc:id="5d818148-5391-443f-896a-8f58c45e957e" config-ref="Database_Config_Accounting" >
+			<db:sql ><![CDATA[INSERT INTO wage_expenses(id, payment_id, debit, credit, date) VALUES (:id, :payment_id, :debit, :credit, :date)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{id: payload.id, payment_id: 100, "debit": payload.amount, "credit": 0, "date": payload.'payment_date'}]]]></db:input-parameters>
+		</db:insert>
 	</flow>
 </mule>
