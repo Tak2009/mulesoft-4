@@ -17,8 +17,11 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 			<jms:factory-configuration brokerUrl="${activemq.brokerUrl}" />
 		</jms:active-mq-connection>
 	</jms:config>
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="6135ab13-20f2-4c62-b994-149633cfef52" >
+	<db:config name="Database_Config_Finance" doc:name="Database Config" doc:id="6135ab13-20f2-4c62-b994-149633cfef52" >
 		<db:generic-connection url="${finance.url}" driverClassName="${finance.driver}" user="${finance.user}" password="${finance.pw}"/>
 	</db:config>
 	<configuration-properties doc:name="Configuration properties" doc:id="57ccbb93-75a0-4456-b3d4-a626305effbb" file="config.yaml" />
+	<db:config name="Database_Config_Hr" doc:name="Database Config" doc:id="5f6c5915-7bfd-4190-844e-10500a11f81d" >
+		<db:generic-connection url="${trainee.host}" driverClassName="${trainee.driver}" user="${trainee.user}" password="${trainee.pw}" />
+	</db:config>
 </mule>

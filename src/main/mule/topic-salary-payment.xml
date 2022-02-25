@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-	<flow name="queue-salary-payment-queueFlow" doc:id="2bd43b46-3cde-4630-8b88-5c03b1fd14bd" >
+	<flow name="queue-salary-paymentFlow" doc:id="2bd43b46-3cde-4630-8b88-5c03b1fd14bd" initialState="stopped">
 		<http:listener doc:name="Listener" doc:id="0e08e996-dbfe-48a3-95b8-2b91e26bd4f8" config-ref="HTTP_Listener_config" allowedMethods="POST" path="/payrunq"/>
 		<jms:publish doc:name="Publish" doc:id="3a36cd86-630a-4c94-96c7-e5ff709894ed" config-ref="JMS_Config" destination="Project4">
 			<jms:message >
@@ -18,20 +18,20 @@ payload]]]></jms:body>
 		</jms:publish>
 		<logger level="INFO" doc:name="Logger" doc:id="af481408-20d7-40be-9a07-0bcc628195bc" />
 	</flow>
-	<flow name="queue-salary-payment-Flow1" doc:id="9ad201ed-6ee3-4373-ab00-fbf18b588627" >
+	<flow name="queue-salary-paymentFlow1" doc:id="9ad201ed-6ee3-4373-ab00-fbf18b588627" initialState="stopped">
 		<jms:listener doc:name="On New Message" doc:id="e3bb4d96-5f29-48fc-ae9d-c9490abdc6ac" config-ref="JMS_Config" destination="Project4">
 			<jms:consumer-type >
 				<jms:queue-consumer />
 			</jms:consumer-type>
 		</jms:listener>
 		<logger level="INFO" doc:name="Logger" doc:id="0b251626-cba5-426a-86ba-d8e2e313c94b" />
-		<db:insert doc:name="Insert" doc:id="57c8b87c-b1c3-4f41-b465-d20ceea37556" config-ref="Database_Config">
+		<db:insert doc:name="Insert" doc:id="57c8b87c-b1c3-4f41-b465-d20ceea37556" config-ref="Database_Config_Finance">
 			<db:sql ><![CDATA[INSERT INTO payments(student_id, amount, bank_account, sort_code) VALUES (:student_id, :amount, :bank_account, :sort_code)]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.amount, bank_account: payload.'bank_account', sort_code: payload.'sort_code'}]]]></db:input-parameters>
 		</db:insert>
 		<logger level="INFO" doc:name="Logger" doc:id="58eef7fa-f6a1-466d-aee5-ca8f4c92fc15" />
 	</flow>
-	<flow name="topic-salary-payment-queueFlow" doc:id="968336df-839d-4514-810c-b3291ae6d5e4" >
+	<flow name="http-payrun_topicFlow" doc:id="968336df-839d-4514-810c-b3291ae6d5e4" >
 		<http:listener doc:name="Listener" doc:id="b694e55b-f16b-433d-8b41-23f6e006dc4f" config-ref="HTTP_Listener_config" path="/payrunt" allowedMethods="POST" />
 		<jms:publish doc:name="Publish" doc:id="6a5ddc03-5634-445c-abba-632968fb168f" config-ref="JMS_Config" destination="Project4Topic" destinationType="TOPIC">
 			<jms:message >
@@ -43,16 +43,35 @@ payload]]]></jms:body>
 		</jms:publish>
 		<logger level="INFO" doc:name="Logger" doc:id="3acfe12e-4230-48b9-8653-882f09ca6b3a" />
 	</flow>
-	<flow name="topic-salary-paymentFlow1" doc:id="1bfc992f-6a7d-427a-b156-241691baaff5" >
-		<jms:listener doc:name="On New Message" doc:id="ce03170d-c1bc-4bf4-b9fa-9f0f07b658a7" config-ref="JMS_Config" destination="Project4Topic" numberOfConsumers="1">
+	<flow name="topic-finance-paymentsFlow" doc:id="1bfc992f-6a7d-427a-b156-241691baaff5" >
+		<jms:listener doc:name="Listen to Topic" doc:id="ce03170d-c1bc-4bf4-b9fa-9f0f07b658a7" config-ref="JMS_Config" destination="Project4Topic" numberOfConsumers="1">
 			<jms:consumer-type >
 				<jms:topic-consumer />
 			</jms:consumer-type>
 		</jms:listener>
-		<db:insert doc:name="Insert" doc:id="3c6534df-b43e-4029-884b-ccf0a6a388ef" config-ref="Database_Config" >
+		<db:insert doc:name="Insert Into Finance DB" doc:id="3c6534df-b43e-4029-884b-ccf0a6a388ef" config-ref="Database_Config_Finance" >
 			<db:sql ><![CDATA[INSERT INTO payments(student_id, amount, bank_account, sort_code) VALUES (:student_id, :amount, :bank_account, :sort_code)]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.amount, bank_account: payload.'bank_account', sort_code: payload.'sort_code'}]]]></db:input-parameters>
+			<db:input-parameters ><![CDATA[#[{student_id: payload.'student_id', amount: payload.'payment_amount', bank_account: payload.'bank_account', sort_code: payload.'sort_code'}]]]></db:input-parameters>
 		</db:insert>
 		<logger level="INFO" doc:name="Logger" doc:id="cdcf43c4-cecd-41cb-b4bf-1e59943de701" />
+	</flow>
+	<flow name="topic-hr-salariesFlow" doc:id="9783a297-1c0d-4b1c-9bf5-32daaa4c4647" >
+		<jms:listener doc:name="Listen to Topic" doc:id="e2395b2c-776b-4c90-94ba-e9b4c0c335cd" config-ref="JMS_Config" destination="Project4Topic" numberOfConsumers="1" >
+			<jms:consumer-type >
+				<jms:topic-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<db:insert doc:name="Insert into HR DB" doc:id="a4d2ea13-0bf9-4c12-a422-6c40066c8b19" config-ref="Database_Config_Hr" >
+			<db:sql ><![CDATA[INSERT INTO salaries(id, student_id, payment_month, payment_date, payment_amount) VALUES (:id, :student_id, :payment_month, :payment_date, :payment_amount)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{id: payload.'id', student_id: payload.'student_id', "payment_month": payload.'payment_month', "payment_date": payload.'payment_date', "payment_amount": payload.'payment_amount'}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="3ff63da6-1eb3-43f0-8f59-c7b9221e93d3" />
+	</flow>
+	<flow name="financedb-accounting-sevraltablesFlow" doc:id="a6f2888a-7f08-4daa-827f-d8d8a7522c3f" >
+		<db:listener doc:name="Check Finance DB" doc:id="4921ac9e-4db1-4f0e-881b-336050c20b29" config-ref="Database_Config_Finance" table="payments" watermarkColumn="id" idColumn="id">
+			<scheduling-strategy>
+				<fixed-frequency frequency="10" timeUnit="SECONDS" />
+			</scheduling-strategy>
+		</db:listener>
 	</flow>
 </mule>
